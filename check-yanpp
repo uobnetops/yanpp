@@ -2,3 +2,134 @@
 
 use strict;
 use warnings;
+use Net::Ping;
+use Getopt::Long;
+use Time::HiRes;
+use List::Util qw( min max );
+use lib "/usr/lib64/nagios/plugins" ;
+use utils qw($TIMEOUT %ERRORS &print_revision &support &usage);
+use vars qw($PROGNAME);
+use Getopt::Long;
+use vars qw($opt_V $opt_h $verbose $opt_w $opt_c $opt_H $opt_n);
+
+
+$PROGNAME = "check_yanpp";
+sub print_help ();
+sub print_usage ();
+
+# Read in options
+GetOptions
+        ("V"   => \$opt_V, "version"    => \$opt_V,
+         "h"   => \$opt_h, "help"       => \$opt_h,
+         "v" => \$verbose, "verbose"  => \$verbose,
+         "w=s" => \$opt_w, "warning=s"  => \$opt_w,
+         "c=s" => \$opt_c, "critical=s" => \$opt_c,
+         "H=s" => \$opt_H, "hostname=s" => \$opt_H,
+         "n=i" => \$opt_n, "number=i" => \$opt_n);
+
+# Print version
+if ($opt_V) {
+        print_revision($PROGNAME,'2.0.3'); #'
+        exit $ERRORS{'OK'};
+}
+
+# Print help
+if ($opt_h) {
+        print_help();
+        exit $ERRORS{'OK'};
+}
+
+# Sanitise hostname
+$opt_H = shift unless ($opt_H);
+print_usage() unless ($opt_H);
+my $host = $1 if ($opt_H =~ m/^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|[a-zA-Z][-a-zA-Z0]+(\.[a-zA-Z][-a-zA-Z0]+)*)$/);
+print_usage() unless ($host);
+
+# Default crit value
+($opt_c) || ($opt_c = shift) || ($opt_c = 120);
+my $critical = $1 if ($opt_c =~ /([0-9]+)/);
+
+# Default warn value
+($opt_w) || ($opt_w = shift) || ($opt_w = 60);
+my $warning = $1 if ($opt_w =~ /([0-9]+)/);
+
+# Default n value
+($opt_n) || ($opt_n = shift) || ($opt_n = 5);
+
+
+print "will ping $host $opt_n times\n";
+my @results = ();
+my $count = 0;
+for my $i (1..$opt_n) {
+	my $p = Net::Ping->new('icmp');
+	$p->hires();
+	my ($ret, $duration, $ip) = $p->ping($host, 1);
+	if ($ret) {
+		printf("$host [ip: $ip] is alive (packet return time: %.2f ms)\n", 1000 * $duration);
+		push (@results, $duration);
+		$count++;
+	}
+	$p->close();
+}
+
+my $min = min(@results);
+my $max = max(@results);
+my $avg = average(\@results);
+my $stdev = stdev(\@results);
+my $success = $count/$opt_n;
+my $packetloss = 1 - $success;
+
+print "\nmin:$min   max:$max   avg:$avg   stdev:$stdev   packetloss: $packetloss\n";
+
+
+
+
+
+
+# Print usage info for this program
+sub print_usage () {
+        print "Usage: $PROGNAME -H <host> [-w <warn>] [-c <crit>]\n";
+	exit;
+}
+
+# Print help
+sub print_help () {
+        print_revision($PROGNAME,'2.0.3');
+        print "Copyright (c) 2000 Jeffery Blank/Karl DeBisschop\n";
+        print "\n";
+        print_usage();
+        print "\n";
+        print "<warn> = Signal strength at which a warning message will be generated.\n";
+        print "<crit> = Signal strength at which a critical message will be generated.\n\n";
+        support();
+	exit;
+}
+
+# Calculate mean of an array of numbers
+sub average {
+        my($data) = @_;
+        if (not @$data) {
+                die("Empty arrayn");
+        }
+        my $total = 0;
+        foreach (@$data) {
+                $total += $_;
+        }
+        my $average = $total / @$data;
+        return $average;
+}
+
+# Calculate standard deviation of an array of numbers
+sub stdev {
+        my($data) = @_;
+        if(@$data == 1){
+                return 0;
+        }
+        my $average = &average($data);
+        my $sqtotal = 0;
+        foreach(@$data) {
+                $sqtotal += ($average-$_) ** 2;
+        }
+        my $std = ($sqtotal / (@$data-1)) ** 0.5;
+        return $std;
+}
