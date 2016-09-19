@@ -10,7 +10,7 @@ use lib "/usr/lib64/nagios/plugins" ;
 use utils qw($TIMEOUT %ERRORS &print_revision &support &usage);
 use vars qw($PROGNAME);
 use Getopt::Long;
-use vars qw($opt_V $opt_h $verbose $opt_w $opt_c $opt_H $opt_n);
+use vars qw($opt_V $opt_h $opt_w $opt_c $opt_H $opt_n);
 
 
 $PROGNAME = "check_yanpp";
@@ -18,14 +18,14 @@ sub print_help ();
 sub print_usage ();
 
 # Read in options
+Getopt::Long::Configure ("bundling");
 GetOptions
-        ("V"   => \$opt_V, "version"    => \$opt_V,
-         "h"   => \$opt_h, "help"       => \$opt_h,
-         "v" => \$verbose, "verbose"  => \$verbose,
-         "w=s" => \$opt_w, "warning=s"  => \$opt_w,
-         "c=s" => \$opt_c, "critical=s" => \$opt_c,
-         "H=s" => \$opt_H, "hostname=s" => \$opt_H,
-         "n=i" => \$opt_n, "number=i" => \$opt_n);
+        ("V|version"    => \$opt_V,
+         "h|help"       => \$opt_h,
+         "w|warning=s"  => \$opt_w,
+         "c|critical=s" => \$opt_c,
+         "H|hostname=s" => \$opt_H,
+         "n|number=i" => \$opt_n);
 
 # Print version
 if ($opt_V) {
