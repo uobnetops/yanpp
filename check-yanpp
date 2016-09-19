@@ -72,9 +72,9 @@ for my $i (1..$opt_n) {
 	$p->close();
 }
 
-my $min = min(@results);
-my $max = max(@results);
-my $avg = average(\@results);
+my $min = round(min(@results));
+my $max = round(max(@results));
+my $avg = round(average(\@results));
 my $stdev = stdev(\@results);
 my $success = $count/$opt_n;
 my $packetloss = 1 - $success;
@@ -132,4 +132,14 @@ sub stdev {
         }
         my $std = ($sqtotal / (@$data-1)) ** 0.5;
         return $std;
+}
+
+# Round to 6 decimal places
+sub round {
+	my $number = shift;
+	$number = $number * 1000000;
+	$number = $number + 0.5;
+	$number = int($number);
+	$number = $number / 1000000;
+	return $number;
 }
