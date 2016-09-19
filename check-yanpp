@@ -57,7 +57,6 @@ my $warning = $1 if ($opt_w =~ /([0-9]+)/);
 ($opt_n) || ($opt_n = shift) || ($opt_n = 5);
 
 
-print "will ping $host $opt_n times\n";
 my @results = ();
 my $count = 0;
 for my $i (1..$opt_n) {
@@ -65,7 +64,6 @@ for my $i (1..$opt_n) {
 	$p->hires();
 	my ($ret, $duration, $ip) = $p->ping($host, 1);
 	if ($ret) {
-		printf("$host [ip: $ip] is alive (packet return time: %.2f ms)\n", 1000 * $duration);
 		push (@results, $duration);
 		$count++;
 	}
@@ -79,7 +77,7 @@ my $stdev = stdev(\@results);
 my $success = $count/$opt_n;
 my $packetloss = 1 - $success;
 
-print "\nmin:$min   max:$max   avg:$avg   stdev:$stdev   packetloss: $packetloss\n";
+print "min:$min   max:$max   avg:$avg   stdev:$stdev   packetloss: $packetloss\n";
 
 
 
