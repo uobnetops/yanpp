@@ -73,11 +73,11 @@ for my $i (1..$opt_n) {
 my $min = round(min(@results));
 my $max = round(max(@results));
 my $avg = round(average(\@results));
-my $stdev = stdev(\@results);
+my $stdev = round(stdev(\@results));
 my $success = $count/$opt_n;
 my $packetloss = 1 - $success;
 
-print "min:$min   max:$max   avg:$avg   stdev:$stdev   packetloss: $packetloss\n";
+print "min:${min}ms   max:${max}ms   avg:${avg}ms   stdev:${stdev}ms   packetloss: ${packetloss}%\n";
 
 
 
@@ -132,12 +132,12 @@ sub stdev {
         return $std;
 }
 
-# Round to 6 decimal places
+# Round to 6 decimal places and format as milliseconds
 sub round {
 	my $number = shift;
 	$number = $number * 1000000;
 	$number = $number + 0.5;
 	$number = int($number);
-	$number = $number / 1000000;
+	$number = $number / 1000;
 	return $number;
 }
