@@ -9,7 +9,6 @@ use List::Util qw( min max );
 use lib "/usr/lib64/nagios/plugins" ;
 use utils qw($TIMEOUT %ERRORS &print_revision &support &usage);
 use vars qw($PROGNAME);
-use Getopt::Long;
 use vars qw($opt_V $opt_h $opt_w $opt_c $opt_H $opt_n $opt_s);
 
 $PROGNAME = "check_yanpp";
