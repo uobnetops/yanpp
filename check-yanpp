@@ -12,7 +12,6 @@ use vars qw($PROGNAME);
 use Getopt::Long;
 use vars qw($opt_V $opt_h $opt_w $opt_c $opt_H $opt_n $opt_s);
 
-
 $PROGNAME = "check_yanpp";
 sub print_help ();
 sub print_usage ();
@@ -30,7 +29,7 @@ GetOptions
 
 # Print version
 if ($opt_V) {
-        print_revision($PROGNAME,'2.0.3'); #'
+        print_revision($PROGNAME,'1.0.0');
         exit $ERRORS{'OK'};
 }
 
@@ -40,7 +39,7 @@ if ($opt_h) {
         exit $ERRORS{'OK'};
 }
 
-# Sanitise hostname
+# Sanitise hostname, and print usage if we didn't get a valid one
 $opt_H = shift unless ($opt_H);
 print_usage() unless ($opt_H);
 my $host = $1 if ($opt_H =~ m/^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|[a-zA-Z][-a-zA-Z0]+(\.[a-zA-Z][-a-zA-Z0]+)*)$/);
@@ -54,12 +53,11 @@ my ($crit_rta,$crit_pl) = ($1,$2) if ($opt_c =~ /([0-9]+),([0-9]+)%/);
 ($opt_w) || ($opt_w = shift) || ($opt_w = '100,10%');
 my ($warn_rta,$warn_pl) = ($1,$2) if ($opt_w =~ /([0-9]+),([0-9]+)%/);
 
-# Default n value
+# Default n value (number of pings)
 ($opt_n) || ($opt_n = shift) || ($opt_n = 5);
 
-# Default s value
+# Default s value (sleep between pings)
 ($opt_s) || ($opt_s = shift) || ($opt_s = 10);
-
 
 my @results = ();
 my $count = 0;
@@ -102,37 +100,37 @@ if ($packetloss > $crit_pl) {
 my $status;
 if ($critflag == 1) {
 	$status = 'CRITICAL';
-#	exit $ERRORS{'CRITICAL'};
 } elsif ($warnflag == 1) {
 	$status = 'WARNING';
-#	exit $ERRORS{'WARNING'};
 } else {
 	$status = 'OK';
-#	exit $ERRORS{'OK'};
 }
 
-print "PING $status - Packet loss ${packetloss}%, RTA = ${avg} ms | min=${min}ms;$warn_rta;$crit_rta max=${max}ms;$warn_rta;$crit_rta avg=${avg}ms;$warn_rta;$crit_rta stdev=${stdev}ms;$warn_rta;$crit_rta pl=${packetloss}%;$warn_pl;$crit_pl";
+print "PING $status - Packet loss = ${packetloss}%, RTA = ${avg}ms | min=${min}ms;$warn_rta;$crit_rta max=${max}ms;$warn_rta;$crit_rta avg=${avg}ms;$warn_rta;$crit_rta stdev=${stdev}ms;$warn_rta;$crit_rta pl=${packetloss}%;$warn_pl;$crit_pl";
 exit $ERRORS{$status};
-
 
 
 # Print usage info for this program
 sub print_usage () {
         print "Usage: $PROGNAME -H <host> [-w <warnrta>,<warnpl>%] [-c <critrta>,<critpl>%]\n";
-	exit;
 }
 
 # Print help
 sub print_help () {
-        print_revision($PROGNAME,'2.0.3');
-        print "Copyright (c) 2000 Jeffery Blank/Karl DeBisschop\n";
+	print_revision($PROGNAME,'1.0.0');
+        print "Copyright (c) 2016 Jonathan Gazeley\n";
         print "\n";
         print_usage();
         print "\n";
-        print "<warn> = Signal strength at which a warning message will be generated.\n";
-        print "<crit> = Signal strength at which a critical message will be generated.\n\n";
+        print "-V --version\n";
+        print "-h --help       Print this help message\n";
+        print "-w --warning    Comma-separated warning thresholds for RTA and packet loss. Default: 100,10%\n";
+        print "-c --critical   Comma-separated critical thresholds for RTA and packet loss. Default: 1000,50%\n";
+        print "-H --hostname   Hostname or IP address to ping with ICMP packets\n";
+        print "-n --number     Number of ICMP packets to send. Default: 5\n";
+        print "-s --sleep      Time to wait between pings in milliseconds. Default: 10\n";
+        print "\n";
         support();
-	exit;
 }
 
 # Calculate mean of an array of numbers
