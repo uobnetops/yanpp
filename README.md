@@ -53,8 +53,8 @@ in Nagios. The example below is the bare minimum you will need (check the path).
 
 ```
 define command {
-	command_name	check_yanpp
-	command_line	/usr/lib64/nagios/plugins/check_yanpp -H $HOSTADDRESS$
+    command_name    check_yanpp
+    command_line    /usr/lib64/nagios/plugins/check_yanpp -H $HOSTADDRESS$
 }
 ```
 
@@ -62,8 +62,8 @@ If you want to set any of the optional parameters, just append them to the line.
 
 ```
 define command {
-        command_name    check_yanpp
-        command_line    /usr/lib64/nagios/plugins/check_yanpp -H $HOSTADDRESS$ -w 200,20% -c 2000,75% -n 10 -s 100
+    command_name    check_yanpp
+    command_line    /usr/lib64/nagios/plugins/check_yanpp -H $HOSTADDRESS$ -w 200,20% -c 2000,75% -n 10 -s 100
 }
 ```
 
@@ -74,9 +74,9 @@ for `check_yanpp` to get the same monitoring but with more info.
 
 ```
 define service {
-        check_command          check_yanpp
-        host_name              host.example.com
-        service_description    Ping
+    check_command           check_yanpp
+    host_name               host.example.com
+    service_description     Ping
 }
 ```
 
