@@ -21,7 +21,7 @@ with the following modules available:
 * [List::Util](http://search.cpan.org/~pevans/Scalar-List-Utils-1.45/lib/List/Util.pm)
 * [Nagios-Plugins](https://nagios-plugins.org/)
 
-Copy the actual plugin itself (`check-yanpp`) to your system's Nagios plugin directory
+Copy the actual plugin itself (`check_yanpp`) to your system's Nagios plugin directory
 (`/usr/lib64/nagios/plugins/` on Red Hat systems).
 
 If you are using [PNP4Nagios](https://docs.pnp4nagios.org/start) to generate graphs,
