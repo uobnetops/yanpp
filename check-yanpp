@@ -4,13 +4,13 @@ use strict;
 use warnings;
 use Net::Ping;
 use Getopt::Long;
-use Time::HiRes;
+use Time::HiRes qw(usleep);
 use List::Util qw( min max );
 use lib "/usr/lib64/nagios/plugins" ;
 use utils qw($TIMEOUT %ERRORS &print_revision &support &usage);
 use vars qw($PROGNAME);
 use Getopt::Long;
-use vars qw($opt_V $opt_h $opt_w $opt_c $opt_H $opt_n);
+use vars qw($opt_V $opt_h $opt_w $opt_c $opt_H $opt_n $opt_s);
 
 
 $PROGNAME = "check_yanpp";
@@ -22,10 +22,11 @@ Getopt::Long::Configure ("bundling");
 GetOptions
         ("V|version"    => \$opt_V,
          "h|help"       => \$opt_h,
-         "w|warning=s"  => \$opt_w,
-         "c|critical=s" => \$opt_c,
+         "w|warning=s@"  => \$opt_w,
+         "c|critical=s@" => \$opt_c,
          "H|hostname=s" => \$opt_H,
-         "n|number=i" => \$opt_n);
+         "n|number=i" => \$opt_n,
+         "s|sleep=i" => \$opt_s);
 
 # Print version
 if ($opt_V) {
@@ -46,15 +47,18 @@ my $host = $1 if ($opt_H =~ m/^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|[a-zA-Z][-a-zA-Z0
 print_usage() unless ($host);
 
 # Default crit value
-($opt_c) || ($opt_c = shift) || ($opt_c = 120);
-my $critical = $1 if ($opt_c =~ /([0-9]+)/);
+($opt_c) || ($opt_c = shift) || ($opt_c = '1000,50%');
+my ($crit_rta,$crit_pl) = ($1,$2) if ($opt_c =~ /([0-9]+),([0-9]+)%/);
 
 # Default warn value
-($opt_w) || ($opt_w = shift) || ($opt_w = 60);
-my $warning = $1 if ($opt_w =~ /([0-9]+)/);
+($opt_w) || ($opt_w = shift) || ($opt_w = '100,10%');
+my ($warn_rta,$warn_pl) = ($1,$2) if ($opt_w =~ /([0-9]+),([0-9]+)%/);
 
 # Default n value
 ($opt_n) || ($opt_n = shift) || ($opt_n = 5);
+
+# Default s value
+($opt_s) || ($opt_s = shift) || ($opt_s = 10);
 
 
 my @results = ();
@@ -68,25 +72,52 @@ for my $i (1..$opt_n) {
 		$count++;
 	}
 	$p->close();
+	usleep(1000*$opt_s);
 }
 
+# Process the results
 my $min = round(min(@results));
 my $max = round(max(@results));
 my $avg = round(average(\@results));
 my $stdev = round(stdev(\@results));
 my $success = $count/$opt_n;
-my $packetloss = 1 - $success;
+my $packetloss = 100 * (1 - $success);
 
-print "min:${min}ms   max:${max}ms   avg:${avg}ms   stdev:${stdev}ms   packetloss: ${packetloss}%\n";
+# Compare values to find status
+# First the RTAs
+my $warnflag = 0;
+my $critflag = 0;
+if ($avg > $crit_rta) {
+        $critflag = 1;
+} elsif ($avg > $warn_rta) {
+        $warnflag = 1;
+}
 
+if ($packetloss > $crit_pl) {
+	$critflag = 1;
+} elsif ($packetloss > $warn_pl) {
+	$warnflag = 1;
+}
 
+my $status;
+if ($critflag == 1) {
+	$status = 'CRITICAL';
+#	exit $ERRORS{'CRITICAL'};
+} elsif ($warnflag == 1) {
+	$status = 'WARNING';
+#	exit $ERRORS{'WARNING'};
+} else {
+	$status = 'OK';
+#	exit $ERRORS{'OK'};
+}
 
+print "PING $status - Packet loss ${packetloss}%, RTA = ${avg} ms | min=${min}ms;$warn_rta;$crit_rta max=${max}ms;$warn_rta;$crit_rta avg=${avg}ms;$warn_rta;$crit_rta stdev=${stdev}ms;$warn_rta;$crit_rta pl=${packetloss}%;$warn_pl;$crit_pl";
 
 
 
 # Print usage info for this program
 sub print_usage () {
-        print "Usage: $PROGNAME -H <host> [-w <warn>] [-c <crit>]\n";
+        print "Usage: $PROGNAME -H <host> [-w <warnrta>,<warnpl>%] [-c <critrta>,<critpl>%]\n";
 	exit;
 }
 
