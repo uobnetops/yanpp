@@ -112,6 +112,7 @@ if ($critflag == 1) {
 }
 
 print "PING $status - Packet loss ${packetloss}%, RTA = ${avg} ms | min=${min}ms;$warn_rta;$crit_rta max=${max}ms;$warn_rta;$crit_rta avg=${avg}ms;$warn_rta;$crit_rta stdev=${stdev}ms;$warn_rta;$crit_rta pl=${packetloss}%;$warn_pl;$crit_pl";
+exit $ERRORS{$status};
 
 
 
