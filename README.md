@@ -21,6 +21,12 @@ with the following modules available:
 * [List::Util](http://search.cpan.org/~pevans/Scalar-List-Utils-1.45/lib/List/Util.pm)
 * [Nagios-Plugins](https://nagios-plugins.org/)
 
+These modules can be installed from packages on Red Hat by doing:
+
+```
+yum install perl perl-Getopt-Long perl-Time-HiRes perl-Scalar-List-Utils nagios-plugins-perl
+```
+
 Copy the actual plugin itself (`check_yanpp`) to your system's Nagios plugin directory
 (`/usr/lib64/nagios/plugins/` on Red Hat systems).
 
