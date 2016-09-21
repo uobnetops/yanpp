@@ -5,16 +5,19 @@
 #
 $ds_name[1] = "Round Trip Times";
 $opt[1]  = "--vertical-label \"RTA\"  --title \"Ping times\" ";
-$def[1]  =  rrd::def("var1", $RRDFILE[1], $DS[1], "AVERAGE") ;
-$def[1] .=  rrd::line1("var1", "#A4A4A4", "Min") ;
-$def[1] .=  rrd::gprint("var1", array("LAST", "MAX", "AVERAGE"), "%6.2lf $UNIT[1]") ;
 
-$def[1] .=  rrd::def("var2", $RRDFILE[1], $DS[2], "AVERAGE") ;
-$def[1] .=  rrd::line1("var2", "#A4A4A4", "Max") ;
+$def[1]  =  rrd::def("var2", $RRDFILE[1], $DS[2], "AVERAGE") ;
+$def[1] .=  rrd::area("var2", "#DADADA") ;
+$def[1] .=  rrd::line1("var2", "#BDBDBD", "Max") ;
 $def[1] .=  rrd::gprint("var2", array("LAST", "MAX", "AVERAGE"), "%6.2lf $UNIT[1]") ;
 
+$def[1] .=  rrd::def("var1", $RRDFILE[1], $DS[1], "AVERAGE") ;
+$def[1] .=  rrd::area("var1", "#FFFFFF") ;
+$def[1] .=  rrd::line1("var1", "#BDBDBD", "Min") ;
+$def[1] .=  rrd::gprint("var1", array("LAST", "MAX", "AVERAGE"), "%6.2lf $UNIT[1]") ;
+
 $def[1] .=  rrd::def("var3", $RRDFILE[1], $DS[3], "AVERAGE") ;
-$def[1] .=  rrd::line1("var3", "#000000", "Mean") ;
+$def[1] .=  rrd::line1("var3", "#9933ff", "Mean") ;
 $def[1] .=  rrd::gprint("var3", array("LAST", "MAX", "AVERAGE"), "%6.2lf $UNIT[1]") ;
 
 if($WARN[1] != ""){
